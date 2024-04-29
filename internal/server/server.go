@@ -17,7 +17,7 @@ type Server struct {
 	db   *sql.DB
 }
 
-var infoLog = log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime)
+var errorLog = log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime)
 
 func NewServer(db *sql.DB) (*http.Server, error) {
 	port, err := strconv.Atoi(os.Getenv("PORT"))

@@ -52,7 +52,7 @@ func handleJSONDecodeErrors(w http.ResponseWriter, err error) {
 
 	// otherwise default to logging the error and sending a 500 Internal Server Error response
 	default:
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -86,7 +86,7 @@ func validateContentType(w http.ResponseWriter, r *http.Request) bool {
 func parseIDFromPath(w http.ResponseWriter, r *http.Request) (int, error) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return 0, err
 	}

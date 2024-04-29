@@ -53,7 +53,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err := s.db.Exec(stmt, user.Name, user.Email)
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -66,7 +66,7 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := s.db.Query(stmt)
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +77,7 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		user := &user{}
 		if err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
-			infoLog.Println(err)
+			errorLog.Println(err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -86,7 +86,7 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	if err = json.NewEncoder(w).Encode(users); err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -113,7 +113,7 @@ func (s *Server) GetUserById(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, msg, http.StatusNotFound)
 			return
 		} else {
-			infoLog.Println(err)
+			errorLog.Println(err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -121,7 +121,7 @@ func (s *Server) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	if err = json.NewEncoder(w).Encode(user); err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -158,7 +158,7 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = s.db.Exec(stmt, &user.Name, &user.Email, id)
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -176,14 +176,14 @@ func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	result, err := s.db.Exec(stmt, id)
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		infoLog.Println(err)
+		errorLog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
