@@ -35,8 +35,8 @@ func handleJSONDecodeErrors(w http.ResponseWriter, err error) {
 		http.Error(w, msg, http.StatusBadRequest)
 
 	// catch the error caused by extra unexpected fields in the request body
-	case strings.HasPrefix(err.Error(), "json: unknown field "):
-		fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
+	case strings.HasPrefix(err.Error(), "json: unknown field"):
+		fieldName := strings.TrimSpace(strings.TrimPrefix(err.Error(), "json: unknown field"))
 		msg := fmt.Sprintf("Request body contains unknown field %s", fieldName)
 		http.Error(w, msg, http.StatusBadRequest)
 
