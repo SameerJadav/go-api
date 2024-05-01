@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/SameerJadav/go-api/internal/logger"
 )
 
 func handleJSONDecodeErrors(w http.ResponseWriter, err error) {
@@ -52,7 +54,7 @@ func handleJSONDecodeErrors(w http.ResponseWriter, err error) {
 
 	// otherwise default to logging the error and sending a 500 Internal Server Error response
 	default:
-		errorLog.Println(err)
+		logger.Error.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -86,7 +88,7 @@ func validateContentType(w http.ResponseWriter, r *http.Request) bool {
 func parseIDFromPath(w http.ResponseWriter, r *http.Request) (int, error) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return 0, err
 	}

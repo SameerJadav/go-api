@@ -6,6 +6,10 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"github.com/SameerJadav/go-api/internal/logger"
+	"github.com/SameerJadav/go-api/internal/middleware"
+	"github.com/justinas/alice"
 )
 
 type user struct {
@@ -16,7 +20,7 @@ type user struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func (s *Server) RegisterRoutes() *http.ServeMux {
+func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /users", s.CreateUser)
@@ -25,7 +29,7 @@ func (s *Server) RegisterRoutes() *http.ServeMux {
 	mux.HandleFunc("PUT /users/{id}", s.UpdateUser)
 	mux.HandleFunc("DELETE /users/{id}", s.DeleteUser)
 
-	return mux
+	return alice.New(middleware.RecoverPanic, middleware.LogRequest, middleware.SecureHeaders).Then(mux)
 }
 
 func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -53,12 +57,10 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err := s.db.Exec(stmt, user.Name, user.Email)
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Fatalln(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +68,7 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := s.db.Query(stmt)
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Fatalln(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +79,7 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		user := &user{}
 		if err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
-			errorLog.Println(err)
+			logger.Error.Fatalln(err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -86,11 +88,10 @@ func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	if err = json.NewEncoder(w).Encode(users); err != nil {
-		errorLog.Println(err)
+		logger.Error.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) GetUserById(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +114,7 @@ func (s *Server) GetUserById(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, msg, http.StatusNotFound)
 			return
 		} else {
-			errorLog.Println(err)
+			logger.Error.Fatalln(err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -121,11 +122,10 @@ func (s *Server) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	if err = json.NewEncoder(w).Encode(user); err != nil {
-		errorLog.Println(err)
+		logger.Error.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -158,12 +158,10 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = s.db.Exec(stmt, &user.Name, &user.Email, id)
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Fatalln(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -176,14 +174,14 @@ func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	result, err := s.db.Exec(stmt, id)
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Fatalln(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		errorLog.Println(err)
+		logger.Error.Fatalln(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -192,6 +190,4 @@ func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusNotFound)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }

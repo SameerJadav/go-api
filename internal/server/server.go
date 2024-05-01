@@ -3,7 +3,6 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,8 +15,6 @@ type Server struct {
 	port int
 	db   *sql.DB
 }
-
-var errorLog = log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime)
 
 func NewServer(db *sql.DB) (*http.Server, error) {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
