@@ -4,9 +4,15 @@ import (
 	"github.com/SameerJadav/go-api/internal/database"
 	"github.com/SameerJadav/go-api/internal/logger"
 	"github.com/SameerJadav/go-api/internal/server"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error.Fatalln(err)
+	}
+
 	db, err := database.New()
 	if err != nil {
 		logger.Error.Fatalln(err)

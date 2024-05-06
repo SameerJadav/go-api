@@ -7,8 +7,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 type Server struct {
